@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 转 Word 兼容格式</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #goldenBtn {
+            background-color: #ffc107;
+            color: #333;
+            font-weight: bold;
+            order: -1;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #goldenBtn:hover {
+            background-color: #e0a800;
+        }
+        #mdInput {
+            width: 98%;
+            height: 250px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #htmlOutput {
+            border: 1px solid #ccc;
+            padding: 15px;
+            min-height: 100px;
+            background-color: #fff;
+            border-radius: 4px;
+            overflow-wrap: break-word;
+            margin-top: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 20px;
+            border-left: 3px solid #007bff;
+            padding-left: 10px;
+            background-color: #e7f3ff;
+            padding: 10px 5px 10px 15px;
+        }
+        .status-message {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            text-align: center;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        /* 语言切换按钮 */
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .language-toggle:hover {
+            background-color: #218838;
+        }
+        /* 隐藏英文内容（默认） */
+        .en {
+            display: none;
+        }
+        .zh {
+            display: block;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+</head>
+<body>
+
+    <!-- 中英文切换按钮 -->
+    <button class="language-toggle" id="languageToggle">切换到英文 / Switch to English</button>
+
+    <h1 class="zh">Markdown 转 Word 兼容格式</h1>
+    <h1 class="en" style="display: none;">Markdown to Word Compatible Format</h1>
+
+    <div class="button-container">
+         <button id="goldenBtn" class="zh">⭐ 一键转换剪贴板内容 (读取MD -> 复制HTML)</button>
+         <button id="goldenBtn" class="en">⭐ One-click Convert Clipboard Content (Read MD -> Copy HTML)</button>
+         <button id="convertBtn" class="zh">转换下方文本框内容</button>
+         <button id="convertBtn" class="en">Convert Textbox Content Below</button>
+         <button id="copyBtn" disabled class="zh">复制下方预览结果到剪贴板</button>
+         <button id="copyBtn" disabled class="en">Copy Preview Result Below to Clipboard</button>
+    </div>
+
+    <div id="statusArea"></div> <!-- Status messages area -->
+
+    <label for="mdInput" class="zh">或在此处输入/粘贴 Markdown 内容:</label>
+    <label for="mdInput" class="en" style="display: none;">Or enter/paste Markdown content here:</label>
+    <textarea id="mdInput" placeholder="在这里输入或粘贴 Markdown..."></textarea>
+
+    <label for="htmlOutput" class="zh">转换结果预览:</label>
+    <label for="htmlOutput" class="en" style="display: none;">Conversion Result Preview:</label>
+    <div id="htmlOutput"></div>
+
+    <div class="info">
+        <p><strong class="zh">使用说明:</strong><strong class="en" style="display: none;">Instructions:</strong></p>
+        <ul>
+            <li class="zh"><strong>⭐ 一键转换按钮:</strong>
+                <ol>
+                    <li>先复制你的 Markdown 文本到系统剪贴板。</li>
+                    <li>点击此按钮。浏览器可能会请求访问剪贴板的权限，请允许。</li>
+                    <li>成功后，转换好的 Word 兼容格式 (HTML) 会自动复制回剪贴板。</li>
+                    <li>直接去 Word 中粘贴即可。</li>
+                </ol>
+            </li>
+            <li class="en" style="display: none;"><strong>⭐ One-click Conversion Button:</strong>
+                <ol>
+                    <li>First, copy your Markdown text to the system clipboard.</li>
+                    <li>Click this button. The browser may request clipboard access permission, please allow.</li>
+                    <li>After success, the converted Word-compatible format (HTML) will be automatically copied back to the clipboard.</li>
+                    <li>You can directly paste it into Word.</li>
+                </ol>
+            </li>
+            <li class="zh"><strong>下方文本框和按钮:</strong>
+                <ul>
+                    <li>在文本框输入或粘贴 Markdown。</li>
+                    <li>点击“转换下方文本框内容”按钮，在下方“预览区”查看效果。</li>
+                    <li>点击“复制下方预览结果到剪贴板”按钮，将预览区内容复制。</li>
+                    <li>去 Word 中粘贴。</li>
+                </ul>
+            </li>
+            <li class="en" style="display: none;"><strong>Textbox and Button Below:</strong>
+                <ul>
+                    <li>Enter or paste Markdown in the textbox.</li>
+                    <li>Click the "Convert Textbox Content Below" button to see the effect in the "Preview Area" below.</li>
+                    <li>Click the "Copy Preview Result Below to Clipboard" button to copy the preview content.</li>
+                    <li>Paste it into Word.</li>
+                </ul>
+            </li>
+            <li class="zh"><strong>兼容性:</strong> 此工具将 Markdown 转为 HTML。Word 能较好地解析 HTML 格式。复杂 Markdown 或 Word 特有功能可能无法完美转换。此版本使用较旧的转换库以提高兼容性。</li>
+            <li class="en" style="display: none;"><strong>Compatibility:</strong> This tool converts Markdown to HTML. Word can parse HTML format well. Complex Markdown or Word-specific features may not convert perfectly. This version uses an older conversion library for better compatibility.</li>
+        </ul>
+    </div>
+
+    <script>
+        const mdInput = document.getElementById('mdInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const htmlOutput = document.getElementById('htmlOutput');
+        const goldenBtn = document.getElementById('goldenBtn');
+        const statusArea = document.getElementById('statusArea');
+        const languageToggle = document.getElementById('languageToggle');
+
+        // 切换语言
+        languageToggle.addEventListener('click', () => {
+            const isChinese = document.querySelector('.zh').style.display !== 'none';
+            if (isChinese) {
+                // 切换到英文
+                document.querySelectorAll('.zh').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.en').forEach(el => el.style.display = 'block');
+                languageToggle.textContent = '切换到中文 / Switch to Chinese';
+            } else {
+                // 切换到中文
+                document.querySelectorAll('.en').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.zh').forEach(el => el.style.display = 'block');
+                languageToggle.textContent = '切换到英文 / Switch to English';
+            }
+        });
+
+        // 显示状态消息
+        function showStatus(message, isError = false) {
+            statusArea.innerHTML = `<div class="status-message ${isError ? 'status-error' : 'status-success'}">${message}</div>`;
+            setTimeout(() => {
+                statusArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // 核心复制 HTML 到剪贴板的函数
+        async function copyHtmlToClipboard(htmlContent, sourceButton) {
+            if (!htmlContent || htmlContent.trim() === '') {
+                showStatus('没有内容可复制。/ No content to copy.', true);
+                return false;
+            }
+
+            try {
+                let plainText = '';
+                try {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlContent;
+                    plainText = tempDiv.textContent || tempDiv.innerText || '';
+                } catch (e) {
+                    console.warn("无法从HTML提取纯文本备用:", e);
+                    plainText = htmlContent;
+                }
+
+                // 尝试使用 Clipboard API
+                try {
+                    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+                    const textBlob = new Blob([plainText], { type: 'text/plain' });
+                    const clipboardItem = new ClipboardItem({
+                        'text/html': htmlBlob,
+                        'text/plain': textBlob
+                    });
+
+                    await navigator.clipboard.write([clipboardItem]);
+                    const originalText = sourceButton.textContent;
+                    const originalBg = sourceButton.style.backgroundColor;
+                    const originalColor = sourceButton.style.color;
+                    sourceButton.textContent = '已复制! / Copied!';
+                    sourceButton.style.backgroundColor = '#28a745'; // 绿色 / Green
+                    sourceButton.style.color = 'white';
+                    setTimeout(() => {
+                        sourceButton.textContent = originalText;
+                        sourceButton.style.backgroundColor = originalBg;
+                        sourceButton.style.color = originalColor;
+                    }, 2000);
+                    return true;
+                } catch (err) {
+                    console.error('Clipboard API 失败, 使用 execCommand 作为后备方案:', err);
+                }
+
+                // 使用 execCommand 作为后备方案
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                document.body.appendChild(tempDiv);
+                tempDiv.innerHTML = htmlContent;
+
+                const range = document.createRange();
+                range.selectNodeContents(tempDiv);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                let successful = false;
+                try {
+                    successful = document.execCommand('copy');
+                } catch (execError) {
+                    console.error('execCommand 执行失败:', execError);
+                } finally {
+                    selection.removeAllRanges();
+                    document.body.removeChild(tempDiv);
+                }
+
+                if (successful) {
+                    const originalText = sourceButton.textContent;
+                    const originalBg = sourceButton.style.backgroundColor;
+                    const originalColor = sourceButton.style.color;
+                    sourceButton.textContent = '已复制! (备用) / Copied! (Fallback)';
+                    sourceButton.style.backgroundColor = '#28a745';
+                    sourceButton.style.color = 'white';
+                    setTimeout(() => {
+                        sourceButton.textContent = originalText;
+                        sourceButton.style.backgroundColor = originalBg;
+                        sourceButton.style.color = originalColor;
+                    }, 2000);
+                    return true;
+                } else {
+                    throw new Error('execCommand 返回 false');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                showStatus('复制失败！浏览器可能不支持或阻止了此操作。/ Copy failed! The browser may not support or block this operation.', true);
+                const originalText = sourceButton.textContent;
+                const originalBg = sourceButton.style.backgroundColor;
+                const originalColor = sourceButton.style.color;
+                sourceButton.textContent = '复制失败 / Copy Failed';
+                sourceButton.style.backgroundColor = '#dc3545'; // 红色 / Red
+                sourceButton.style.color = 'white';
+                setTimeout(() => {
+                    sourceButton.textContent = originalText;
+                    sourceButton.style.backgroundColor = originalBg;
+                    sourceButton.style.color = originalColor;
+                }, 3000);
+                return false;
+            }
+        }
+
+        goldenBtn.addEventListener('click', async () => {
+            statusArea.innerHTML = '';
+            let mdFromClipboard = '';
+            try {
+                if (!navigator.clipboard || !navigator.clipboard.readText) {
+                     showStatus('错误：您的浏览器不支持读取剪贴板内容。/ Error: Your browser does not support reading clipboard content.', true);
+                     return;
+                }
+                mdFromClipboard = await navigator.clipboard.readText();
+                if (!mdFromClipboard || mdFromClipboard.trim() === '') {
+                    showStatus('剪贴板为空或无文本内容。请先复制 Markdown。/ Clipboard is empty or has no content. Please copy Markdown first.', true);
+                    return;
+                }
+                showStatus('已成功读取剪贴板内容，正在转换... / Successfully read clipboard content, converting...', false);
+
+            } catch (err) {
+                console.error('读取剪贴板失败:', err);
+                if (err.name === 'NotAllowedError' || (typeof err.message === 'string' && err.message.toLowerCase().includes('permission denied'))) {
+                     showStatus('无法读取剪贴板：需要剪贴板读取权限。/ Cannot read clipboard: Clipboard read permission is required.', true);
+                } else {
+                     showStatus('读取剪贴板失败：' + (err.message || '未知错误') + ' / Clipboard read failed: ' + (err.message || 'Unknown error'), true);
+                }
+                return;
+            }
+
+            let htmlResult = '';
+            try {
+                htmlResult = marked.parse(mdFromClipboard);
+                htmlOutput.innerHTML = htmlResult;
+                copyBtn.disabled = false;
+            } catch (parseError) {
+                console.error("Markdown 解析错误:", parseError);
+                const errorMessage = parseError.message || '未知解析错误 / Unknown parsing error';
+                showStatus(`Markdown 解析出错：${errorMessage} / Markdown parsing error: ${errorMessage}`, true);
+                htmlOutput.innerHTML = `<p style="color: red;">剪贴板内容 Markdown 解析出错：${errorMessage} / Clipboard Markdown parsing error: ${errorMessage}</p>`;
+                copyBtn.disabled = true;
+                return;
+            }
+
+            const copySuccess = await copyHtmlToClipboard(htmlResult, goldenBtn);
+            if (copySuccess) {
+                 showStatus('成功！转换后的内容已复制到剪贴板，可以去 Word 粘贴了。/ Success! The converted content has been copied to clipboard, you can paste it into Word.', false);
+            }
+        });
+
+        convertBtn.addEventListener('click', () => {
+            statusArea.innerHTML = '';
+            const mdText = mdInput.value;
+            if (mdText.trim() === '') {
+                htmlOutput.innerHTML = '<p style="color: grey;">请输入 Markdown 内容。/ Please enter Markdown content.</p>';
+                copyBtn.disabled = true;
+                return;
+            }
+            try {
+                const html = marked.parse(mdText);
+                htmlOutput.innerHTML = html;
+                copyBtn.disabled = false;
+                showStatus('文本框内容已成功转换为 HTML 预览。/ Textbox content successfully converted to HTML preview.', false);
+            } catch (error) {
+                console.error("Markdown 解析错误:", error);
+                const errorMessage = error.message || '未知解析错误 / Unknown parsing error';
+                htmlOutput.innerHTML = `<p style="color: red;">Markdown 解析出错：${errorMessage} / Markdown parsing error: ${errorMessage}</p>`;
+                copyBtn.disabled = true;
+                showStatus(`Markdown 解析出错：${errorMessage} / Markdown parsing error: ${errorMessage}`, true);
+            }
+        });
+
+        copyBtn.addEventListener('click', async () => {
+            statusArea.innerHTML = '';
+            const copySuccess = await copyHtmlToClipboard(htmlOutput.innerHTML, copyBtn);
+            if (copySuccess) {
+                 showStatus('预览结果已复制到剪贴板。/ Preview result copied to clipboard.', false);
+            }
+        });
+
+        mdInput.addEventListener('input', () => {
+             copyBtn.disabled = true;
+             statusArea.innerHTML = '';
+        });
+
+    </script>
+
+</body>
+</html>
