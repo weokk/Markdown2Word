@@ -1,12 +1,7 @@
 # Markdown2Word
 
-**Project Title:** Simple Markdown to Word-Compatible HTML Converter
-
-**Short Description (for GitHub repo description field):**
-
 A client-side HTML tool to convert Markdown text into Word-compatible HTML, with direct input and clipboard-to-clipboard functionality. Uses marked.js (v4.3.0).
 
-**Long Description (for README.md):**
 
 ## Simple Markdown to Word-Compatible HTML Converter
 
@@ -29,7 +24,7 @@ It provides a straightforward way to bridge the gap between writing in Markdown 
 
 **How to Use:**
 
-1.  Download or save the `.html` file (e.g., `markdown_to_word_v2_compat.html`).
+1.  Download or save the `markdown2word.html` file.
 2.  Open the file in your web browser.
 3.  **Option A (Text Area):**
     *   Paste/type your Markdown into the text area.
@@ -52,13 +47,9 @@ It provides a straightforward way to bridge the gap between writing in Markdown 
 
 **中文版:**
 
-**项目标题:** 简洁的 Markdown 转 Word 兼容 HTML 转换器
-
-**简短描述 (用于 GitHub 仓库描述栏):**
 
 一个客户端 HTML 工具，用于将 Markdown 文本转换为 Word 兼容的 HTML，支持直接输入和剪贴板到剪贴板的一键操作。使用 marked.js (v4.3.0)。
 
-**详细描述 (用于 README.md):**
 
 ## 简洁的 Markdown 转 Word 兼容 HTML 转换器
 
@@ -81,7 +72,7 @@ It provides a straightforward way to bridge the gap between writing in Markdown 
 
 **如何使用:**
 
-1.  下载或保存此 `.html` 文件 (例如 `markdown2word.html`)。
+1.  下载或保存此 `markdown2word.html` 文件 。
 2.  在你的网页浏览器中打开该文件。
 3.  **方式 A (使用文本框):**
     *   将 Markdown 粘贴/输入到文本区域。
